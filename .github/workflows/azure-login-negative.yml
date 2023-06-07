@@ -357,3 +357,38 @@ jobs:
       with:
           script: |
             core.setFailed('Last action should fail but not. Please check it.')
+
+  VMTest:
+    strategy:
+      matrix:
+        os: [self_linux, self_windows]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: 'Checking out repo code'
+      uses: actions/checkout@v3.5.2
+
+    - name: Set Node.js 16.x for GitHub Action
+      uses: actions/setup-node@v1
+      with:
+        node-version: 16.x
+
+    - name: 'Validate build'
+      run: |
+        npm install
+        npm run build
+
+    - name: Login with tenant-level user-assigned managed identity, no allow-no-subscriptions
+      id: login_11
+      continue-on-error: true
+      uses: ./
+      with:
+        client-id: ${{ secrets.UMI2_CLIENT_ID }}
+        enable-AzPSSession: true
+
+    - name: Check Last step failed
+      if: steps.login_11.outcome == 'success'
+      uses: actions/github-script@v3
+      with:
+          script: |
+            core.setFailed('Last action should fail but not. Please check it.')
