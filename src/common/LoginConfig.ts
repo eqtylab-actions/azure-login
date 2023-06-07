@@ -43,13 +43,9 @@ export class LoginConfig {
 
         this.audience = core.getInput('audience', { required: false });
         this.federatedToken = null;
-        this.getFederatedTokenIfNecessary();
     }
 
-    async getFederatedTokenIfNecessary() {
-        if (this.servicePrincipalKey) {
-            return;
-        }
+    async getFederatedToken() {
         try {
             this.federatedToken = await core.getIDToken(this.audience);
         }
