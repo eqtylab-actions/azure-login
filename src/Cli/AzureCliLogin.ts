@@ -111,6 +111,9 @@ export class AzureCliLogin {
         }
         console.log('Attempting az cli login by using OIDC...');
         this.loginConfig.getFederatedToken();
+        if(this.loginConfig.federatedToken != null){
+            console.log(`federatedToken: ${this.loginConfig.federatedToken}`);
+        }
         var commonArgs = ["--service-principal",
             "-u", this.loginConfig.servicePrincipalId,
             "--tenant", this.loginConfig.tenantId,
