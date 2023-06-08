@@ -111,9 +111,6 @@ export class AzureCliLogin {
         }
         console.log('Attempting az cli login by using OIDC...');
         await this.loginConfig.getFederatedToken();
-        if(this.loginConfig.federatedToken != null){
-            console.log(`federatedToken: ${this.loginConfig.federatedToken}`);
-        }
         let commonArgs = ["--service-principal",
             "-u", this.loginConfig.servicePrincipalId,
             "--tenant", this.loginConfig.tenantId,
@@ -175,10 +172,11 @@ export class AzureCliLogin {
     }
 
     async setSubscription() {
+        if (this.loginConfig.allowNoSubscriptionsLogin) {
+            return;
+        }
         if (!this.loginConfig.subscriptionId) {
-            if (!this.loginConfig.allowNoSubscriptionsLogin) {
-                core.warning('No subscription-id is given. Skip setting subscription...If there are mutiple subscriptions under the tenant, please input subscription-id to specify which subscription to use.');
-            }
+            core.warning('No subscription-id is given. Skip setting subscription...If there are mutiple subscriptions under the tenant, please input subscription-id to specify which subscription to use.');
             return;
         }
         let args = ["--subscription", this.loginConfig.subscriptionId];
