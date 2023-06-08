@@ -208,7 +208,7 @@ function defaultExecOptions(): exec.ExecOptions {
                         //removing the keyword 'ERROR' to avoid duplicates while throwing error
                         error = error.slice(5);
                     }
-                    core.setFailed(error);
+                    core.error(error);
                 }
             }
         }
