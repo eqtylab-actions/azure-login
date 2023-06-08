@@ -107,21 +107,6 @@ jobs:
         allow-no-subscriptions: true
         # enable-AzPSSession: true
 
-    - name: Run Azure Cli
-      run: |
-        az account show
-        az group show --name GitHubActionGroup
-        az vm list
-
-    # - name: Run Azure PowerShell
-    #   uses: azure/powershell@v1.2.0
-    #   with:
-    #     azPSVersion: "latest"
-    #     inlineScript: |
-    #       Get-AzContext | Format-List
-    #       Get-AzResourceGroup -Name GitHubActionGroup
-    #       Get-AzVM
-
     - name: Login with creds, disable ps session
       uses: ./
       with:

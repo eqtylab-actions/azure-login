@@ -395,13 +395,14 @@ jobs:
         npm install
         npm run build
 
-    - name: Login with tenant-level user-assigned managed identity, no allow-no-subscriptions
+    - name: Login with tenant-level user-assigned managed identity, with subscription specified
       id: login_12
       continue-on-error: true
       uses: ./
       with:
         client-id: ${{ secrets.UMI2_CLIENT_ID }}
-        enable-AzPSSession: true
+        subscription-id: ${{ secrets.UMI1_SUBSCRIPTION_ID }}
+        # enable-AzPSSession: true
 
     - name: Check Last step failed
       if: steps.login_12.outcome == 'success'
