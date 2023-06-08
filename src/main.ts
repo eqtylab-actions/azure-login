@@ -32,7 +32,9 @@ async function main() {
             await spnlogin.login();
         }
 
-        console.log("Login successful.");
+        if(cliLogin.isSuccess){
+            console.log("Login successful.");
+        }
     }
     catch (error) {
         if (!cliLogin.isSuccess) {

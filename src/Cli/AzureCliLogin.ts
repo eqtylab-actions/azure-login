@@ -32,12 +32,12 @@ export class AzureCliLogin {
             }
         };
 
-        await this.executeAzCliCommand("--version", true, execOptions);
+        await this.executeAzCliCommand('--version', [], true, execOptions);
         core.debug(`az cli version used:\n${output}`);
 
         this.setAzurestackEnvIfNecessary();
 
-        await this.executeAzCliCommand(`cloud set -n "${this.loginConfig.environment}"`, false);
+        await this.executeAzCliCommand('cloud set', ['-n', `${this.loginConfig.environment}`], false);
         console.log(`Done setting cloud: "${this.loginConfig.environment}"`);
 
         await this.loginWithSecret();
@@ -56,8 +56,8 @@ export class AzureCliLogin {
 
         console.log(`Unregistering cloud: "${this.loginConfig.environment}" first if it exists`);
         try {
-            await this.executeAzCliCommand(`cloud set -n AzureCloud`, true);
-            await this.executeAzCliCommand(`cloud unregister -n "${this.loginConfig.environment}"`, false);
+            await this.executeAzCliCommand('cloud set', ["-n", "AzureCloud"], true);
+            await this.executeAzCliCommand('cloud unregister', ["-n", `${this.loginConfig.environment}`], false);
         }
         catch (error) {
             console.log(`Ignore cloud not registered error: "${error}"`);
@@ -86,16 +86,16 @@ export class AzureCliLogin {
             return;
         }
         console.log('Attempting az cli login by using service principal with secret...\nNote: Azure/login action also supports OIDC login mechanism. If you want to use OIDC login, please do not input ClientSecret. Refer https://github.com/azure/login#configure-a-service-principal-with-a-federated-credential-to-use-oidc-based-authentication for more details.');
-        var commonArgs = ["--service-principal",
+        let commonArgs = ["--service-principal",
             "-u", this.loginConfig.servicePrincipalId,
             "--tenant", this.loginConfig.tenantId,
             "-p", this.loginConfig.servicePrincipalKey
         ];
         if (this.loginConfig.allowNoSubscriptionsLogin) {
-            commonArgs = commonArgs.concat("--allow-no-subscriptions");
+            commonArgs.push("--allow-no-subscriptions");
         }
         try {
-            await this.executeAzCliCommand(`login`, true, this.loginOptions, commonArgs);
+            await this.executeAzCliCommand('login', commonArgs, true, this.loginOptions);
             await this.setSubscription();
             this.isSuccess = true;
             console.log('Az cli login succeed by using service principal with secret.');
@@ -110,20 +110,20 @@ export class AzureCliLogin {
             return;
         }
         console.log('Attempting az cli login by using OIDC...');
-        this.loginConfig.getFederatedToken();
+        await this.loginConfig.getFederatedToken();
         if(this.loginConfig.federatedToken != null){
             console.log(`federatedToken: ${this.loginConfig.federatedToken}`);
         }
-        var commonArgs = ["--service-principal",
+        let commonArgs = ["--service-principal",
             "-u", this.loginConfig.servicePrincipalId,
             "--tenant", this.loginConfig.tenantId,
             "--federated-token", this.loginConfig.federatedToken
         ];
         if (this.loginConfig.allowNoSubscriptionsLogin) {
-            commonArgs = commonArgs.concat("--allow-no-subscriptions");
+            commonArgs.push("--allow-no-subscriptions");
         }
         try {
-            await this.executeAzCliCommand(`login`, true, this.loginOptions, commonArgs);
+            await this.executeAzCliCommand('login', commonArgs, true, this.loginOptions);
             await this.setSubscription();
             this.isSuccess = true;
             console.log('Az cli login succeed by using OIDC.');
@@ -138,13 +138,13 @@ export class AzureCliLogin {
             return;
         }
         console.log('Attempting az cli login by using user-assigned managed identity...');
-        var commonArgs = ["--identity",
+        let commonArgs = ["--identity",
             "-u", this.loginConfig.servicePrincipalId];
         if (this.loginConfig.allowNoSubscriptionsLogin) {
-            commonArgs = commonArgs.concat("--allow-no-subscriptions");
+            commonArgs.push("--allow-no-subscriptions");
         }
         try {
-            await this.executeAzCliCommand(`login`, true, this.loginOptions, commonArgs);
+            await this.executeAzCliCommand('login', commonArgs, true, this.loginOptions);
             await this.setSubscription();
             this.isSuccess = true;
             console.log('Az cli login succeed by using user-assigned managed identity.');
@@ -159,12 +159,12 @@ export class AzureCliLogin {
             return;
         }
         console.log('Attempting az cli login by using system-assigned managed identity...');
-        var commonArgs = ["--identity"];
+        let commonArgs = ["--identity"];
         if (this.loginConfig.allowNoSubscriptionsLogin) {
-            commonArgs = commonArgs.concat("--allow-no-subscriptions");
+            commonArgs.push("--allow-no-subscriptions");
         }
         try {
-            await this.executeAzCliCommand(`login`, true, this.loginOptions, commonArgs);
+            await this.executeAzCliCommand('login', commonArgs, true, this.loginOptions);
             await this.setSubscription();
             this.isSuccess = true;
             console.log('Az cli login succeed by using system-assigned managed identity.');
@@ -181,16 +181,16 @@ export class AzureCliLogin {
             }
             return;
         }
-        var args = ["--subscription", this.loginConfig.subscriptionId];
-        await this.executeAzCliCommand(`account set`, true, this.loginOptions, args);
+        let args = ["--subscription", this.loginConfig.subscriptionId];
+        await this.executeAzCliCommand('account set', args, true, this.loginOptions);
         console.log('Subscription is set successfully.');
     }
 
     async executeAzCliCommand(
         command: string,
+        args: string[],
         silent?: boolean,
-        execOptions: any = {},
-        args: any = []) {
+        execOptions: any = {}) {
         execOptions.silent = !!silent;
         await exec.exec(`"${this.azPath}" ${command}`, args, execOptions);
     }
